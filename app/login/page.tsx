@@ -341,8 +341,8 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => {
                   setSelectedRole("customer");
-                  setEmail("customer@afriverse.co.tz");
-                  setPassword("customer123");
+                  setEmail("");
+                  setPassword("");
                 }}
                 className={`py-2 text-xs font-bold rounded-xl transition-all ${
                   selectedRole === "customer" ? "bg-[#D4AF37] text-black shadow" : "text-earth-cream/70 hover:text-white"
@@ -354,8 +354,8 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => {
                   setSelectedRole("artisan");
-                  setEmail("artisan@afriverse.co.tz");
-                  setPassword("artisan123");
+                  setEmail("");
+                  setPassword("");
                 }}
                 className={`py-2 text-xs font-bold rounded-xl transition-all ${
                   selectedRole === "artisan" ? "bg-[#D4AF37] text-black shadow" : "text-earth-cream/70 hover:text-white"
@@ -367,8 +367,8 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => {
                   setSelectedRole("admin");
-                  setEmail("admin@afriverse.co.tz");
-                  setPassword("8509Sirat#");
+                  setEmail("");
+                  setPassword("");
                 }}
                 className={`py-2 text-xs font-bold rounded-xl transition-all ${
                   selectedRole === "admin" ? "bg-[#D4AF37] text-black shadow" : "text-earth-cream/70 hover:text-white"
@@ -449,7 +449,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="user@afriverse.co.tz"
+              placeholder="Enter your email address"
                 className="w-full bg-obsidian-surface border border-[#D4AF37]/30 rounded-xl px-4 py-3 text-xs text-earth-cream font-body focus:outline-none focus:border-[#D4AF37]"
               />
             </div>
@@ -464,7 +464,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   className="w-full bg-obsidian-surface border border-[#D4AF37]/30 rounded-xl px-4 py-3 pr-10 text-xs text-earth-cream font-mono focus:outline-none focus:border-[#D4AF37]"
                 />
                 <button
@@ -475,11 +475,6 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
-              {selectedRole === "admin" && (
-                <div className="text-[10px] text-[#D4AF37]/70 mt-1 font-mono">
-                  Default Admin Key: <strong>8509Sirat#</strong>
-                </div>
-              )}
             </div>
 
             {authMode === "register" && (
@@ -492,7 +487,7 @@ export default function LoginPage() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Confirm your password"
                   className="w-full bg-obsidian-surface border border-[#D4AF37]/30 rounded-xl px-4 py-3 text-xs text-earth-cream font-mono focus:outline-none focus:border-[#D4AF37]"
                 />
               </div>
