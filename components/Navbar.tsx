@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, Globe, ChevronDown, ShoppingBag, Search, Sun, Moon, User as UserIcon, MessageSquare, Truck, ShieldCheck, Store } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Menu, X, Globe, ShoppingBag, Sun, Moon, User as UserIcon, Store, LogOut, ChevronDown } from "lucide-react";
 import type { Language, Currency } from "@/lib/data";
 import { useStore } from "@/lib/store";
 
 interface NavbarProps {
-  lang: Language;
-  currency: Currency;
-  onLangChange: (l: Language) => void;
-  onCurrencyChange: (c: Currency) => void;
+  lang?: Language;
+  currency?: Currency;
+  onLangChange?: (l: Language) => void;
+  onCurrencyChange?: (c: Currency) => void;
 }
 
 const navLinks = {
@@ -19,25 +20,60 @@ const navLinks = {
     { href: "/products", label: "Shop" },
     { href: "/artisans", label: "Artisans" },
     { href: "/culture", label: "Culture & Map" },
-    { href: "/sell", label: "Sell with Us" },
     { href: "/delivery", label: "Track Delivery" },
-    { href: "/chat", label: "Artisan Chat" },
   ],
   sw: [
     { href: "/", label: "Nyumbani" },
     { href: "/products", label: "Duka" },
     { href: "/artisans", label: "Mafundi" },
     { href: "/culture", label: "Utamaduni & Ramani" },
-    { href: "/sell", label: "Uza Nasi" },
     { href: "/delivery", label: "Fuatilia Mzigo" },
-    { href: "/chat", label: "Mazungumzo" },
   ],
 };
 
-export default function Navbar({ lang, currency, onLangChange, onCurrencyChange }: NavbarProps) {
+export default function Navbar({
+  lang: propsLang,
+  currency: propsCurrency,
+  onLangChange: propsOnLangChange,
+  onCurrencyChange: propsOnCurrencyChange,
+}: NavbarProps = {}) {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { theme, toggleTheme, currentUser, cart } = useStore();
+  const store = useStore();
+  const { cart, currentUser, theme, toggleTheme, logout } = store;
+
+  const lang = propsLang || store.lang;
+  const currency = propsCurrency || store.currency;
+
+  const isArtisan = currentUser?.role === "artisan" || currentUser?.role === "seller";
+  const isAdmin = currentUser?.role === "admin";
+
+  const userDashboardRoute = isArtisan
+    ? "/dashboard/artisan"
+    : isAdmin
+    ? "/dashboard/admin"
+    : "/dashboard/customer";
+
+  const handleLangToggle = () => {
+    const nextLang = lang === "en" ? "sw" : "en";
+    if (propsOnLangChange) propsOnLangChange(nextLang);
+    store.setLang(nextLang);
+  };
+
+  const handleCurrencyToggle = () => {
+    const nextCurrency = currency === "USD" ? "TZS" : "USD";
+    if (propsOnCurrencyChange) propsOnCurrencyChange(nextCurrency);
+    store.setCurrency(nextCurrency);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setMenuOpen(false);
+    setUserDropdownOpen(false);
+    router.push("/login");
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -89,7 +125,7 @@ export default function Navbar({ lang, currency, onLangChange, onCurrencyChange 
 
           {/* Right Controls */}
           <div className="hidden lg:flex items-center gap-2.5">
-            {/* Theme Toggle Switcher */}
+            {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
               title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
@@ -101,32 +137,90 @@ export default function Navbar({ lang, currency, onLangChange, onCurrencyChange 
 
             {/* Language Toggle */}
             <button
-              onClick={() => onLangChange(lang === "en" ? "sw" : "en")}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-gold/20 hover:border-gold/50 text-earth-cream/70 hover:text-gold text-xs font-body font-medium transition-all"
+              onClick={handleLangToggle}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gold/30 hover:border-gold text-earth-cream/80 hover:text-gold text-xs font-body font-semibold transition-all bg-gold/5"
               id="lang-toggle"
             >
-              <Globe size={11} />
-              {lang === "en" ? "🇬🇧 EN" : "🇹🇿 SW"}
+              <Globe size={13} className="text-gold" />
+              <span>{lang === "en" ? "🇬🇧 EN" : "🇹🇿 SW"}</span>
             </button>
 
             {/* Currency Toggle */}
             <button
-              onClick={() => onCurrencyChange(currency === "USD" ? "TZS" : "USD")}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-gold/20 hover:border-gold/50 text-earth-cream/70 hover:text-gold text-xs font-body font-medium transition-all"
+              onClick={handleCurrencyToggle}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gold/30 hover:border-gold text-earth-cream/80 hover:text-gold text-xs font-body font-semibold transition-all bg-gold/5"
               id="currency-toggle"
             >
-              {currency === "USD" ? "$ USD" : "TZS"}
+              <span className="text-gold font-bold">{currency === "USD" ? "$" : "T"}</span>
+              <span>{currency === "USD" ? "USD" : "TZS"}</span>
             </button>
 
-            {/* Auth / Dashboard Button */}
-            <Link
-              href={currentUser ? "/dashboard" : "/login"}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gold/40 text-gold hover:bg-gold/10 text-xs font-body font-semibold transition-all"
-              id="nav-user-btn"
-            >
-              <UserIcon size={13} />
-              <span>{currentUser ? currentUser.role.toUpperCase() : "LOGIN"}</span>
-            </Link>
+            {/* Auth / Dashboard Button & Dropdown */}
+            {currentUser ? (
+              <div
+                className="relative"
+                onMouseEnter={() => setUserDropdownOpen(true)}
+                onMouseLeave={() => setUserDropdownOpen(false)}
+              >
+                <div className="flex items-center gap-1.5">
+                  {/* User Profile Button: links directly to /dashboard/artisan if artisan */}
+                  <Link
+                    href={userDashboardRoute}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#D4AF37]/50 bg-[#D4AF37]/10 text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black text-xs font-body font-bold transition-all shadow-sm"
+                    id="nav-user-btn"
+                  >
+                    <UserIcon size={13} />
+                    <span>{currentUser.role.toUpperCase()}</span>
+                    <ChevronDown size={12} className="opacity-70" />
+                  </Link>
+
+                  <button
+                    onClick={handleLogout}
+                    title="Sign Out"
+                    className="p-2 rounded-full border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/60 transition-all"
+                    id="logout-btn"
+                  >
+                    <LogOut size={13} />
+                  </button>
+                </div>
+
+                {/* Dropdown Menu */}
+                {userDropdownOpen && (
+                  <div className="absolute right-0 mt-1.5 w-52 rounded-2xl bg-[#141418] border border-[#D4AF37]/30 shadow-2xl p-2 z-50 animate-in fade-in">
+                    <div className="px-3 py-2 border-b border-white/10 mb-1">
+                      <p className="text-xs font-bold text-white truncate">{currentUser.name}</p>
+                      <p className="text-[10px] text-[#D4AF37] font-mono capitalize">
+                        {currentUser.shopName || `${currentUser.role} Account`}
+                      </p>
+                    </div>
+                    <Link
+                      href={userDashboardRoute}
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-white hover:bg-[#D4AF37]/15 hover:text-[#D4AF37] font-semibold transition"
+                    >
+                      <Store size={14} className="text-[#D4AF37]" />
+                      <span>Dashboard</span>
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-red-400 hover:bg-red-950/40 transition font-semibold text-left"
+                    >
+                      <LogOut size={14} />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-gold/40 text-gold hover:bg-gold/10 text-xs font-body font-semibold transition-all"
+                id="nav-user-btn"
+              >
+                <UserIcon size={13} />
+                <span>LOGIN</span>
+              </Link>
+            )}
 
             {/* Cart & Checkout */}
             <Link
@@ -178,36 +272,52 @@ export default function Navbar({ lang, currency, onLangChange, onCurrencyChange 
               </Link>
             ))}
 
-            <Link
-              href="/dashboard"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-2 py-3 text-gold font-body font-semibold border-b border-obsidian-surface"
-            >
-              <Store size={16} />
-              Artisan & Admin Dashboard
-            </Link>
+            {currentUser && (
+              <Link
+                href={userDashboardRoute}
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 py-3 text-gold font-body font-semibold border-b border-obsidian-surface"
+              >
+                <Store size={16} />
+                {isArtisan
+                  ? "Artisan Studio Dashboard"
+                  : isAdmin
+                  ? "Admin Control Hub"
+                  : "Customer Order Portal"}
+              </Link>
+            )}
 
-            <Link
-              href="/login"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-2 py-3 text-gold font-body font-semibold border-b border-obsidian-surface"
-            >
-              <UserIcon size={16} />
-              Login / Switch Role ({currentUser ? currentUser.role : "Guest"})
-            </Link>
+            {currentUser ? (
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 py-3 text-red-400 font-body font-semibold border-b border-obsidian-surface w-full text-left"
+              >
+                <LogOut size={16} />
+                {lang === "en" ? `Sign Out (${currentUser.name})` : `Toka (${currentUser.name})`}
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 py-3 text-gold font-body font-semibold border-b border-obsidian-surface"
+              >
+                <UserIcon size={16} />
+                {lang === "en" ? "Login / Register" : "Ingia / Jisajili"}
+              </Link>
+            )}
 
             <div className="flex gap-3 pt-4">
               <button
-                onClick={() => onLangChange(lang === "en" ? "sw" : "en")}
-                className="flex-1 py-2 rounded-full border border-gold/30 text-gold text-xs font-body"
+                onClick={handleLangToggle}
+                className="flex-1 py-2.5 rounded-full border border-gold/40 text-gold text-xs font-body font-semibold bg-gold/5"
               >
-                {lang === "en" ? "🇹🇿 Swahili" : "🇬🇧 English"}
+                {lang === "en" ? "🇹🇿 Switch to Swahili" : "🇬🇧 Switch to English"}
               </button>
               <button
-                onClick={() => onCurrencyChange(currency === "USD" ? "TZS" : "USD")}
-                className="flex-1 py-2 rounded-full border border-gold/30 text-gold text-xs font-body"
+                onClick={handleCurrencyToggle}
+                className="flex-1 py-2.5 rounded-full border border-gold/40 text-gold text-xs font-body font-semibold bg-gold/5"
               >
-                {currency === "USD" ? "Switch to TZS" : "Switch to USD"}
+                {currency === "USD" ? "🇹🇿 Switch to TZS" : "💵 Switch to USD"}
               </button>
             </div>
           </div>

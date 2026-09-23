@@ -5,12 +5,15 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { categories } from "@/lib/data";
 import type { Language } from "@/lib/data";
+import { useStore } from "@/lib/store";
 
 interface CategoryGridProps {
-  lang: Language;
+  lang?: Language;
 }
 
-export default function CategoryGrid({ lang }: CategoryGridProps) {
+export default function CategoryGrid({ lang: propsLang }: CategoryGridProps = {}) {
+  const store = useStore();
+  const lang = propsLang || store.lang;
   const isEn = lang === "en";
 
   return (
@@ -28,8 +31,8 @@ export default function CategoryGrid({ lang }: CategoryGridProps) {
         </h2>
         <p className="text-earth-cream/50 font-body text-lg max-w-xl mx-auto">
           {isEn
-            ? "From world-exclusive Tanzanite to hand-crafted Maasai beadwork — every category tells a story."
-            : "Kutoka Tanzanite ya kipekee duniani hadi mapambo ya Kimaasai yaliyoshonwa kwa mikono."}
+            ? "From authentic Maasai Shuka textiles to hand-crafted beadwork and Mount Meru fine art — every category tells a story."
+            : "Kutoka vitambaa halisi vya Maasai Shuka hadi mapambo ya Kimaasai yaliyoshonwa kwa mikono na sanaa ya Mlima Meru."}
         </p>
       </div>
 

@@ -5,12 +5,11 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CultureMap from "@/components/CultureMap";
 import { arushLocations } from "@/lib/data";
-import type { Language, Currency } from "@/lib/data";
+import { useStore } from "@/lib/store";
 import { MapPin, Users, BookOpen, Mountain, Camera, Phone, Clock, Compass, ShieldCheck } from "lucide-react";
 
 export default function CulturePage() {
-  const [lang, setLang] = useState<Language>("en");
-  const [currency, setCurrency] = useState<Currency>("USD");
+  const { lang, setLang, currency, setCurrency } = useStore();
   const [showVisitingGuide, setShowVisitingGuide] = useState(false);
   const isEn = lang === "en";
 
@@ -27,7 +26,7 @@ export default function CulturePage() {
     {
       icon: Mountain,
       title: isEn ? "Mount Meru & Arusha Region" : "Mlima Meru & Eneo la Arusha",
-      desc: isEn ? "Heartland of authentic Arusha artisan-made goods, tanzanite gemstone mining, and organic coffee slopes." : "Kitovu cha bidhaa halisi za mikono za Arusha na kilimo cha kahawa.",
+      desc: isEn ? "Heartland of authentic Arusha artisan-made goods, highland clay crafts, and organic coffee slopes." : "Kitovu cha bidhaa halisi za mikono za Arusha na kilimo cha kahawa.",
       stat: isEn ? "1,600m Altitude" : "Urefu mita 1,600",
     },
     {
@@ -39,7 +38,7 @@ export default function CulturePage() {
     {
       icon: Camera,
       title: isEn ? "Cultural Heritage Centre" : "Kituo cha Urithi wa Utamaduni",
-      desc: isEn ? "Arusha's premier arts, craft, and tanzanite gallery destination with 140+ verified artisan displays." : "Lengo kuu la sanaa na ufundi la Arusha.",
+      desc: isEn ? "Arusha's premier arts and craft gallery destination with 140+ verified artisan displays." : "Lengo kuu la sanaa na ufundi la Arusha.",
       stat: isEn ? "Dodoma Rd, Arusha" : "Barabara ya Dodoma",
     },
     {

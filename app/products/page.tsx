@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { categories } from "@/lib/data";
 import { useStore } from "@/lib/store";
-import type { Language, Currency } from "@/lib/data";
+
 import { SlidersHorizontal, Search, X, Sparkles } from "lucide-react";
 
 export default function ProductsPage() {
@@ -16,8 +16,15 @@ export default function ProductsPage() {
 
   const isEn = lang === "en";
 
+  const selectedCatObj = categories.find((c) => c.id === selectedCat);
+
   const filtered = products.filter((p) => {
-    const matchCat = !selectedCat || p.category.toLowerCase().includes(selectedCat.toLowerCase());
+    const matchCat =
+      !selectedCat ||
+      (selectedCatObj &&
+        (p.category.toLowerCase().includes(selectedCatObj.name.en.toLowerCase().split("&")[0].trim().toLowerCase()) ||
+          selectedCatObj.name.en.toLowerCase().includes(p.category.toLowerCase()) ||
+          p.category.toLowerCase() === selectedCatObj.name.en.toLowerCase()));
     const matchQuery =
       !query ||
       p.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -45,8 +52,8 @@ export default function ProductsPage() {
         </h1>
         <p className="text-earth-cream/70 font-body text-base max-w-xl">
           {isEn
-            ? "Handpicked authentic Arusha artisan-made goods including Maasai shuka textiles, Maasai shuka jewelry, tanzanite rings, and wood carvings."
-            : "Bidhaa halisi zilizochaguliwa kwa mikono kutoka kwa mafundi wa Arusha."}
+            ? "Handpicked authentic Arusha artisan-made goods including Maasai shuka textiles, ceremonial beaded jewelry, Mount Meru fine art, and single-origin coffee."
+            : "Bidhaa halisi zilizochaguliwa kwa mikono kutoka kwa mafundi wa Arusha zikiwemo Maasai shuka, sanaa za mikono na kahawa bora."}
         </p>
       </section>
 
@@ -111,7 +118,9 @@ export default function ProductsPage() {
         {filtered.length === 0 ? (
           <div className="text-center py-24">
             <p className="text-earth-cream/40 text-4xl mb-4">🔍</p>
-            <p className="text-earth-cream/70 font-body">{isEn ? "No products found matching your search." : "Hakuna bidhaa zilizopatikana."}</p>
+            <p className="text-earth-cream/70 font-body">
+              {isEn ? "No products found matching your search." : "Hakuna bidhaa zilizopatikana."}
+            </p>
             <button onClick={() => { setQuery(""); setSelectedCat(null); }} className="mt-4 text-gold text-sm font-body font-bold hover:underline">
               {isEn ? "Clear all filters" : "Futa vichujio"}
             </button>

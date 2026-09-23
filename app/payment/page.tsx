@@ -4,8 +4,9 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PaymentBadges from "@/components/PaymentBadges";
+import AIRecommendations from "@/components/AIRecommendations";
 import { useStore } from "@/lib/store";
-import { paymentMethods, formatPrice } from "@/lib/data";
+import { paymentMethods, formatPrice, formatPriceCombined } from "@/lib/data";
 import { ShieldCheck, CheckCircle2, Phone, CreditCard, Lock, Sparkles, Printer, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -14,7 +15,7 @@ export default function PaymentPage() {
   const isEn = lang === "en";
 
   const [selectedMethod, setSelectedMethod] = useState<string>("mpesa");
-  const [phoneNumber, setPhoneNumber] = useState("+255754998882");
+  const [phoneNumber, setPhoneNumber] = useState("+255714223344");
   const [cardNumber, setCardNumber] = useState("4532 8890 1234 5678");
   const [cardExpiry, setCardExpiry] = useState("12/28");
   const [cardCvc, setCardCvc] = useState("882");
@@ -123,8 +124,10 @@ export default function PaymentPage() {
                 <span className="font-bold text-gold">{completedOrder.paymentMethod}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-earth-cream/60">Total Paid:</span>
-                <span className="font-bold text-gold text-base">TZS {completedOrder.totalPriceTZS.toLocaleString()} (${completedOrder.totalPriceUSD})</span>
+                <span className="text-earth-cream/60">{isEn ? "Total Paid:" : "Jumla Iliyolipwa:"}</span>
+                <span className="font-bold text-gold text-base">
+                  {formatPriceCombined(completedOrder.totalPriceUSD, currency)}
+                </span>
               </div>
             </div>
 
@@ -318,7 +321,9 @@ export default function PaymentPage() {
                     disabled={processing}
                     className="w-full btn-gold py-4 rounded-xl text-base font-body font-bold shadow-gold-lg mt-4"
                   >
-                    {processing ? "Processing Encrypted Payment..." : `Pay TZS ${totalTZS.toLocaleString()} ($${totalUSD}) →`}
+                    {processing
+                      ? (isEn ? "Processing Encrypted Payment..." : "Inachakata Malipo Yaliyolindwa...")
+                      : `${isEn ? "Pay Now" : "Lipa Sasa"} — ${formatPrice(currency === "TZS" ? totalTZS : totalUSD, currency)} (${formatPrice(currency === "TZS" ? totalUSD : totalTZS, currency === "TZS" ? "USD" : "TZS")}) →`}
                   </button>
                 </form>
               </div>
@@ -327,36 +332,48 @@ export default function PaymentPage() {
             {/* Right: Order Summary */}
             <div className="lg:col-span-5 space-y-6">
               <div className="glass-card rounded-3xl p-6 border-2 border-gold/30 shadow-luxury">
-                <h3 className="font-display font-bold text-xl text-earth-cream mb-4">Order Summary</h3>
+                <h3 className="font-display font-bold text-xl text-earth-cream mb-4">
+                  {isEn ? "Order Summary" : "Muhtasari wa Oda"}
+                </h3>
 
                 <div className="space-y-3 mb-6">
                   {cart.length > 0 ? (
                     cart.map((item) => (
                       <div key={item.product.id} className="flex justify-between text-xs font-body border-b border-gold/10 pb-2">
                         <span>{item.quantity}x {item.product.name}</span>
-                        <span className="font-mono font-bold text-gold">${item.product.priceUSD * item.quantity}</span>
+                        <span className="font-mono font-bold text-gold">
+                          {formatPrice(currency === "TZS" ? item.product.priceTZS * item.quantity : item.product.priceUSD * item.quantity, currency)}
+                        </span>
                       </div>
                     ))
                   ) : (
                     <>
                       <div className="flex justify-between text-xs font-body border-b border-gold/10 pb-2">
                         <span>1x Authentic Maasai Shuka Cloth</span>
-                        <span className="font-mono font-bold text-gold">$65</span>
+                        <span className="font-mono font-bold text-gold">
+                          {formatPrice(currency === "TZS" ? 65 * 2580 : 65, currency)}
+                        </span>
                       </div>
                       <div className="flex justify-between text-xs font-body border-b border-gold/10 pb-2">
                         <span>1x Maasai Shuka Beaded Jewelry Set</span>
-                        <span className="font-mono font-bold text-gold">$55</span>
+                        <span className="font-mono font-bold text-gold">
+                          {formatPrice(currency === "TZS" ? 55 * 2580 : 55, currency)}
+                        </span>
                       </div>
                     </>
                   )}
 
                   <div className="flex justify-between text-sm font-body font-bold pt-2 border-t border-gold/30">
-                    <span>Total USD:</span>
-                    <span className="text-gold font-mono">${totalUSD}</span>
+                    <span>{isEn ? `Total (${currency}):` : `Jumla (${currency}):`}</span>
+                    <span className="text-gold font-mono text-base font-bold">
+                      {formatPrice(currency === "TZS" ? totalTZS : totalUSD, currency)}
+                    </span>
                   </div>
-                  <div className="flex justify-between text-sm font-body font-bold">
-                    <span>Total TZS:</span>
-                    <span className="text-gold font-mono">TZS {totalTZS.toLocaleString()}</span>
+                  <div className="flex justify-between text-xs font-body text-earth-cream/60">
+                    <span>{isEn ? `Equivalent in ${currency === "USD" ? "TZS" : "USD"}:` : `Sawa na ${currency === "USD" ? "TZS" : "USD"}:`}</span>
+                    <span className="font-mono">
+                      {formatPrice(currency === "TZS" ? totalUSD : totalTZS, currency === "TZS" ? "USD" : "TZS")}
+                    </span>
                   </div>
                 </div>
 
@@ -372,6 +389,16 @@ export default function PaymentPage() {
             </div>
           </div>
         )}
+
+        {/* AI Cultural Recommendations for Checkout */}
+        <div className="mt-16">
+          <AIRecommendations
+            cartProductIds={cart.map((i) => i.product.id)}
+            lang={lang}
+            currency={currency}
+            title={isEn ? "Complete Your Order with Authentic Cultural Pairings" : "Kamilisha Oda Yako na Bidhaa Sambamba za Arusha"}
+          />
+        </div>
       </section>
 
       <PaymentBadges lang={lang} />

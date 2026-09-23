@@ -18,6 +18,7 @@ import {
   Clock,
   Send,
   Navigation,
+  ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -173,20 +174,26 @@ export default function DeliveryPage() {
                 {/* SMS Notification Trigger Button */}
                 <div className="mt-8 pt-6 border-t border-gold/20 flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <div className="text-xs font-bold text-gold">SMS Live Status Alerts</div>
-                    <div className="text-[11px] text-earth-cream/70">Receive instant SMS updates on +255754998882.</div>
+                    <div className="text-xs font-bold text-gold">
+                      {isEn ? "SMS Live Dispatch Alerts" : "Taarifa za Papo Hapo kwa SMS"}
+                    </div>
+                    <div className="text-[11px] text-earth-cream/70">
+                      {isEn
+                        ? `Send instant delivery updates to buyer at ${matchedOrder.customerPhone || "+255714223344"}.`
+                        : `Tuma taarifa za usafirishaji kwa mnunuzi ${matchedOrder.customerPhone || "+255714223344"}.`}
+                    </div>
                   </div>
                   <button
                     onClick={handleSendSMS}
                     className="btn-gold px-5 py-2.5 rounded-full text-xs font-body font-bold flex items-center gap-2"
                   >
-                    <Send size={14} /> Send SMS Update to +255754998882
+                    <Send size={14} /> {isEn ? "Send SMS Update" : "Tuma SMS ya Taarifa"}
                   </button>
                 </div>
 
                 {smsSent && (
                   <div className="mt-3 bg-green-950/80 border border-green-500/50 text-green-300 text-xs font-body rounded-xl p-3 text-center animate-bounce">
-                    📱 <strong>SMS Sent to +255754998882:</strong> "AFRIVERSE Update: Order #{matchedOrder.id} is {matchedOrder.status}. Rider: Juma Kassim (+255754998882)."
+                    📱 <strong>SMS Sent to {matchedOrder.customerPhone || "+255714223344"}:</strong> "AFRIVERSE Delivery Update: Order #{matchedOrder.id} status is {matchedOrder.status}. Courier: {matchedOrder.bodaBodaRider?.name || 'Juma Kassim'} ({matchedOrder.bodaBodaRider?.phone || '+255768432109'}). Support Hotline: +255754998882."
                   </div>
                 )}
               </div>
@@ -201,7 +208,9 @@ export default function DeliveryPage() {
                     🏍️
                   </div>
                   <div>
-                    <span className="text-[10px] text-sky-400 font-bold uppercase tracking-wider">Assigned Local Courier</span>
+                    <span className="text-[10px] text-sky-400 font-bold uppercase tracking-wider">
+                      {isEn ? "Assigned Local Courier" : "Msafirishaji wa Boda Boda"}
+                    </span>
                     <h3 className="font-display font-bold text-lg text-white">
                       {matchedOrder.bodaBodaRider?.name || "Juma Kassim"}
                     </h3>
@@ -210,32 +219,69 @@ export default function DeliveryPage() {
 
                 <div className="space-y-2 text-xs font-body text-earth-cream/80 border-t border-sky-500/20 pt-3">
                   <div className="flex justify-between">
-                    <span>Rider Phone:</span>
-                    <span className="font-mono font-bold text-gold">{matchedOrder.bodaBodaRider?.phone || "+255754998882"}</span>
+                    <span>{isEn ? "Rider Direct Phone:" : "Simu ya Msafirishaji:"}</span>
+                    <span className="font-mono font-bold text-gold">
+                      {matchedOrder.bodaBodaRider?.phone || "+255768432109"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Motorcycle Plate:</span>
-                    <span className="font-mono font-bold text-sky-300">{matchedOrder.bodaBodaRider?.plateNumber || "MC 452 ABC"}</span>
+                    <span>{isEn ? "Motorcycle Plate:" : "Namba ya Boda Boda:"}</span>
+                    <span className="font-mono font-bold text-sky-300">
+                      {matchedOrder.bodaBodaRider?.plateNumber || "MC 452 ABC"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Payment Status:</span>
-                    <span className="font-bold text-green-400">Paid Directly by Artisan ✅</span>
+                    <span>{isEn ? "Payment Status:" : "Hali ya Malipo:"}</span>
+                    <span className="font-bold text-green-400">
+                      {isEn ? "Paid Directly by Artisan ✅" : "Imelipwa na Msanii Moja kwa Moja ✅"}
+                    </span>
                   </div>
                 </div>
 
                 <div className="pt-2 flex gap-3">
                   <a
-                    href="tel:+255754998882"
+                    href={`tel:${matchedOrder.bodaBodaRider?.phone || "+255768432109"}`}
                     className="flex-1 btn-gold py-2.5 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-1.5"
                   >
-                    <Phone size={14} /> Call Rider
+                    <Phone size={14} /> {isEn ? "Call Rider" : "Piga Simu ya Rider"}
                   </a>
                   <Link
                     href="/chat"
                     className="flex-1 btn-outline-gold py-2.5 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-1.5"
                   >
-                    <MessageSquare size={14} /> In-App Chat
+                    <MessageSquare size={14} /> {isEn ? "In-App Chat" : "Meseji"}
                   </Link>
+                </div>
+              </div>
+
+              {/* Afriverse Official Hotline Card */}
+              <div className="glass-card rounded-3xl p-6 border-2 border-gold/40 bg-gold/5 shadow-luxury space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center text-gold">
+                    <ShieldCheck size={20} />
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-gold font-bold uppercase tracking-wider">
+                      {isEn ? "24/7 Arusha Support Hotline" : "Msaada wa Arusha 24/7"}
+                    </span>
+                    <h4 className="font-display font-bold text-base text-earth-cream">
+                      Afriverse Concierge Team
+                    </h4>
+                  </div>
+                </div>
+                <p className="text-earth-cream/70 text-xs font-body leading-relaxed">
+                  {isEn
+                    ? "Need help with order sealing, escrow verification, or delivery questions? Speak directly to our Arusha operations desk."
+                    : "Unahitaji msaada kuhusu oda yako au uthibitisho wa bidhaa? Wasiliana na timu yetu ya Arusha."}
+                </p>
+                <div className="pt-1 flex items-center justify-between">
+                  <span className="font-mono font-bold text-gold text-sm">+255754998882</span>
+                  <a
+                    href="tel:+255754998882"
+                    className="btn-outline-gold px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1"
+                  >
+                    <Phone size={12} /> {isEn ? "Call Admin Hotline" : "Piga Simu ya Msaada"}
+                  </a>
                 </div>
               </div>
 

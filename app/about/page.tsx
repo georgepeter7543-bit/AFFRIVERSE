@@ -3,13 +3,12 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import type { Language, Currency } from "@/lib/data";
+import { useStore } from "@/lib/store";
 import { Heart, Globe, Leaf, Award, Users, Target, Phone, MapPin } from "lucide-react";
 import Link from "next/link";
 
 export default function AboutPage() {
-  const [lang, setLang] = useState<Language>("en");
-  const [currency, setCurrency] = useState<Currency>("USD");
+  const { lang, setLang, currency, setCurrency } = useStore();
   const isEn = lang === "en";
 
   const values = [
@@ -21,7 +20,7 @@ export default function AboutPage() {
     {
       icon: Leaf,
       title: isEn ? "Authentic Arusha Goods" : "Bidhaa Halisi za Arusha",
-      desc: isEn ? "We list authentic Arusha artisan-made goods — Maasai shuka, jewelry, fine art, and wood carvings." : "Bidhaa halisi za mikono za Arusha.",
+      desc: isEn ? "We list authentic Arusha artisan-made goods — Maasai shuka, jewelry, fine art, and pottery." : "Bidhaa halisi za mikono za Arusha.",
     },
     {
       icon: Users,
@@ -70,7 +69,7 @@ export default function AboutPage() {
           </h1>
           <p className="text-earth-cream/80 font-body text-xl leading-relaxed mb-6">
             {isEn
-              ? "AFRIVERSE Arusha was founded to connect Arusha's finest craftspeople, Maasai shuka weavers, and tanzanite goldsmiths directly with international buyers. Every purchase supports authentic Arusha artisan-made goods."
+              ? "AFRIVERSE Arusha was founded to connect Arusha's finest craftspeople, Maasai shuka weavers, and beaded jewelry makers directly with international buyers. Every purchase supports authentic Arusha artisan-made goods."
               : "AFRIVERSE Arusha ilianzishwa kuunganisha mafundi wa Arusha na masoko ya kimataifa."}
           </p>
           <div className="flex flex-wrap gap-4 text-xs font-body font-bold text-gold bg-gold/10 p-4 rounded-2xl border border-gold/30">

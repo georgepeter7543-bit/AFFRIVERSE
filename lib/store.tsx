@@ -11,6 +11,7 @@ import {
   initialChatThreads,
   Language,
   Currency,
+  Review,
 } from "./data";
 
 interface StoreContextType {
@@ -26,13 +27,17 @@ interface StoreContextType {
 
   // User & Auth
   currentUser: User | null;
-  login: (role: "admin" | "seller" | "buyer", password?: string, name?: string, email?: string) => boolean;
+  setCurrentUser: (user: User | null) => void;
+  login: (role: "admin" | "seller" | "buyer" | "artisan" | "customer", password?: string, name?: string, email?: string) => boolean;
   logout: () => void;
   registerSeller: (details: { businessName: string; phone: string; craft: string; bio: string }) => void;
 
-  // Products
+  // Products & Reviews
   products: Product[];
   addProduct: (product: Omit<Product, "id">) => Product;
+  updateProduct: (productId: string, updates: Partial<Product>) => void;
+  deleteProduct: (productId: string) => void;
+  addReview: (productId: string, review: Omit<Review, "id" | "date">) => void;
 
   // Orders & Boda Boda Delivery Workflow
   orders: Order[];
@@ -49,32 +54,67 @@ interface StoreContextType {
 
   // Cart
   cart: { product: Product; quantity: number }[];
-  addToCart: (product: Product) => void;
+  addToCart: (product: Product, quantity?: number) => void;
+  removeFromCart: (productId: string) => void;
+  updateCartQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
+
+const PRODUCTS_STORAGE_KEY = "afriverse_products";
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [lang, setLang] = useState<Language>("en");
   const [currency, setCurrency] = useState<Currency>("USD");
 
-  // Default User = Admin / Seller / Buyer demo
-  const [currentUser, setCurrentUser] = useState<User | null>({
-    id: "user-admin",
-    name: "AFRIVERSE CEO Admin",
-    email: "admin@afriverse.co.tz",
-    role: "admin",
-    shopName: "AFRIVERSE Arusha HQ",
-    phone: "+255754998882",
-  });
+  // Start null — AuthProvider will hydrate from localStorage
+  const [currentUser, setCurrentUserState] = useState<User | null>(null);
 
   const [products, setProducts] = useState<Product[]>(defaultProducts);
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [chatThreads, setChatThreads] = useState<ChatThread[]>(initialChatThreads);
   const [activeThreadId, setActiveThreadId] = useState<string>("chat-1");
   const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
+
+  // Hydrate products from localStorage on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setProducts(parsed);
+          return;
+        }
+      }
+      // Save initial defaults if empty
+      localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(defaultProducts));
+    } catch (e) {
+      console.warn("Failed to load products from localStorage", e);
+    }
+  }, []);
+
+  // ── Session Hydration ─────────────────────────────────────────────────────
+  // Restore the logged-in user from localStorage whenever the app mounts or
+  // the page is revisited, so that React-context never defaults back to null
+  // while a valid session exists in storage.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem("afriverse_active_session");
+      if (raw) {
+        const saved = JSON.parse(raw) as User;
+        // Only restore if context is still null (avoid overwriting a fresh login)
+        setCurrentUserState((prev) => (prev === null ? saved : prev));
+      }
+    } catch (e) {
+      console.warn("Failed to restore session from localStorage", e);
+    }
+  }, []);
+
 
   // Apply theme class to <html>
   useEffect(() => {
@@ -90,14 +130,26 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
-  const login = (role: "admin" | "seller" | "buyer", password?: string, name?: string, email?: string): boolean => {
+  // Persist session whenever currentUser changes
+  const setCurrentUser = (user: User | null) => {
+    setCurrentUserState(user);
+    if (typeof window !== "undefined") {
+      if (user) {
+        localStorage.setItem("afriverse_active_session", JSON.stringify(user));
+      } else {
+        localStorage.removeItem("afriverse_active_session");
+      }
+    }
+  };
+
+  const login = (role: "admin" | "seller" | "buyer" | "artisan" | "customer", password?: string, name?: string, email?: string): boolean => {
     if (role === "admin") {
       if (password !== "8509Sirat#") {
         return false;
       }
       setCurrentUser({
         id: "admin-master",
-        name: "AFRIVERSE CEO Admin",
+        name: name || "AFRIVERSE CEO Admin",
         email: email || "admin@afriverse.co.tz",
         role: "admin",
         shopName: "AFRIVERSE Master Admin",
@@ -106,13 +158,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return true;
     }
 
-    if (role === "seller") {
+    if (role === "seller" || role === "artisan") {
       setCurrentUser({
-        id: "seller-1",
+        id: "a1",
         name: name || "Amina Kessy",
-        email: email || "amina@afriverse.co.tz",
-        role: "seller",
-        shopName: "Amina Arusha Fine Crafts",
+        email: email || "amina@merucrafts.co.tz",
+        role: "artisan",
+        shopName: "Amina Meru Cultural Crafts Studio",
         phone: "+255754998882",
       });
       return true;
@@ -122,14 +174,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       id: "buyer-1",
       name: name || "Baraka Edward",
       email: email || "baraka@afriverse.co.tz",
-      role: "buyer",
-      phone: "+255754998882",
+      role: "customer",
+      phone: "+255714223344",
     });
     return true;
   };
 
   const logout = () => {
     setCurrentUser(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("afriverse_active_session");
+    }
   };
 
   const registerSeller = (details: { businessName: string; phone: string; craft: string; bio: string }) => {
@@ -137,19 +192,82 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       id: `seller-${Date.now()}`,
       name: details.businessName,
       email: `${details.businessName.toLowerCase().replace(/\s+/g, "")}@afriverse.co.tz`,
-      role: "seller",
+      role: "artisan",
       shopName: details.businessName,
-      phone: details.phone || "+255754998882",
+      phone: details.phone || "+255754112233",
     });
   };
 
+  // Add product & sync to localStorage directly
   const addProduct = (newP: Omit<Product, "id">): Product => {
     const created: Product = {
       ...newP,
       id: `p-${Date.now()}`,
     };
-    setProducts((prev) => [created, ...prev]);
+    setProducts((prev) => {
+      const updated = [created, ...prev];
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
+        } catch (e) {
+          console.error("Failed to persist products to localStorage", e);
+        }
+      }
+      return updated;
+    });
     return created;
+  };
+
+  const updateProduct = (productId: string, updates: Partial<Product>) => {
+    setProducts((prev) => {
+      const updated = prev.map((p) => (p.id === productId ? { ...p, ...updates } : p));
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
+        } catch (e) {
+          console.error("Failed to persist products to localStorage", e);
+        }
+      }
+      return updated;
+    });
+  };
+
+  const deleteProduct = (productId: string) => {
+    setProducts((prev) => {
+      const updated = prev.filter((p) => p.id !== productId);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
+        } catch (e) {
+          console.error("Failed to persist products to localStorage", e);
+        }
+      }
+      return updated;
+    });
+  };
+
+  const addReview = (productId: string, reviewData: Omit<Review, "id" | "date">) => {
+    const newRev: Review = {
+      ...reviewData,
+      id: `rev-${Date.now()}`,
+      date: new Date().toISOString().split("T")[0],
+    };
+    setProducts((prev) => {
+      const updated = prev.map((p) =>
+        p.id === productId
+          ? {
+              ...p,
+              reviews: [newRev, ...(p.reviews || [])],
+            }
+          : p
+      );
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
+        } catch {}
+      }
+      return updated;
+    });
   };
 
   const createOrder = (
@@ -220,16 +338,30 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, quantity: number = 1) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {
         return prev.map((item) =>
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.product.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
         );
       }
-      return [...prev, { product, quantity: 1 }];
+      return [...prev, { product, quantity }];
     });
+  };
+
+  const removeFromCart = (productId: string) => {
+    setCart((prev) => prev.filter((item) => item.product.id !== productId));
+  };
+
+  const updateCartQuantity = (productId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+    setCart((prev) =>
+      prev.map((item) => (item.product.id === productId ? { ...item, quantity } : item))
+    );
   };
 
   const clearCart = () => {
@@ -246,11 +378,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         currency,
         setCurrency,
         currentUser,
+        setCurrentUser,
         login,
         logout,
         registerSeller,
         products,
         addProduct,
+        updateProduct,
+        deleteProduct,
+        addReview,
         orders,
         createOrder,
         sealAfriverseLabel,
@@ -262,6 +398,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         sendMessage,
         cart,
         addToCart,
+        removeFromCart,
+        updateCartQuantity,
         clearCart,
       }}
     >

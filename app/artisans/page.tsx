@@ -5,22 +5,21 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ArtisanCard from "@/components/ArtisanCard";
 import { artisans } from "@/lib/data";
-import type { Language, Currency } from "@/lib/data";
+import { useStore } from "@/lib/store";
 import { Search, SlidersHorizontal, ShieldCheck, MapPin, Truck } from "lucide-react";
 
 const crafts = [
   "All",
-  "Tanzanite & Jewelry",
+  "Maasai Shuka Jewelry",
   "Maasai Shuka & Beadwork",
   "Fine Art",
-  "Wood Carvings",
+  "Clay & Pottery",
   "Coffee & Spices",
   "Safari & Tours",
 ];
 
 export default function ArtisansPage() {
-  const [lang, setLang] = useState<Language>("en");
-  const [currency, setCurrency] = useState<Currency>("USD");
+  const { lang, setLang, currency, setCurrency } = useStore();
   const [query, setQuery] = useState("");
   const [craftFilter, setCraftFilter] = useState("All");
   const isEn = lang === "en";

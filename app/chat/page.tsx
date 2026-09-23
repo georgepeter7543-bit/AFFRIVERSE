@@ -108,16 +108,16 @@ export default function ChatPage() {
                       Verified Arusha Artisan
                     </span>
                   </h3>
-                  <div className="text-xs text-gold/80 font-body">Topic: {activeThread.topic} | Tel: +255754998882</div>
+                  <div className="text-xs text-gold/80 font-body">Topic: {activeThread.topic} | Artisan Direct: +255768432109</div>
                 </div>
               </div>
 
               <div className="flex gap-2">
                 <a
-                  href="tel:+255754998882"
+                  href="tel:+255768432109"
                   className="btn-outline-gold px-3.5 py-1.5 rounded-full text-xs font-body font-semibold flex items-center gap-1"
                 >
-                  <Phone size={12} /> Call
+                  <Phone size={12} /> Call Artisan
                 </a>
                 <Link
                   href="/delivery"

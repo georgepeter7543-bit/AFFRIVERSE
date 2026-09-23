@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SellerOnboarding from "@/components/SellerOnboarding";
@@ -11,9 +12,15 @@ import { CheckCircle, Globe, TrendingUp, Shield, Headphones, Star, AlertCircle, 
 import Link from "next/link";
 
 export default function SellPage() {
-  const [lang, setLang] = useState<Language>("en");
-  const [currency, setCurrency] = useState<Currency>("USD");
-  const { registerSeller, currentUser } = useStore();
+  const router = useRouter();
+  const { lang, setLang, currency, setCurrency, registerSeller, currentUser } = useStore();
+
+  // Redirect authenticated artisans straight to their Artisan Dashboard
+  useEffect(() => {
+    if (currentUser?.role === "artisan" || currentUser?.role === "seller") {
+      router.push("/dashboard/artisan");
+    }
+  }, [currentUser, router]);
   const isEn = lang === "en";
 
   // Form State
@@ -153,7 +160,7 @@ export default function SellPage() {
                 1. Authentic, Quality Goods
               </h3>
               <p className="text-earth-cream/70 text-xs font-body leading-relaxed">
-                We are exclusively looking for genuine, high-craftsmanship products (Maasai shuka, jewelry, carvings, tanzanite).
+                We are exclusively looking for genuine, high-craftsmanship products (Maasai shuka, beaded jewelry, fine art, handcrafted pottery).
               </p>
             </div>
 
@@ -281,7 +288,7 @@ export default function SellPage() {
                       required
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+255 754 998 882"
+                      placeholder="+255 768 432 109"
                       className="w-full bg-obsidian-surface border border-gold/30 rounded-xl px-4 py-3.5 text-sm text-earth-cream placeholder-earth-cream/40 focus:outline-none focus:border-gold font-body"
                     />
                   </div>
@@ -297,11 +304,10 @@ export default function SellPage() {
                       onChange={(e) => setCraft(e.target.value)}
                       className="w-full bg-obsidian-surface border border-gold/30 rounded-xl px-4 py-3.5 text-sm text-earth-cream focus:outline-none focus:border-gold font-body"
                     >
-                      <option value="Maasai Shuka & Textiles">Maasai Shuka & Textiles</option>
+                      <option value="Maasai Shuka & Cultural Textiles">Maasai Shuka & Cultural Textiles</option>
                       <option value="Maasai Shuka Jewelry">Maasai Shuka Jewelry</option>
-                      <option value="Tanzanite & Gold Jewelry">Tanzanite & Gold Jewelry</option>
-                      <option value="Mount Meru Fine Art">Mount Meru Fine Art</option>
-                      <option value="Wood Carvings & Sculptures">Wood Carvings & Sculptures</option>
+                      <option value="East African Fine Art & Decor">East African Fine Art & Decor</option>
+                      <option value="Handcrafted Meru Pottery & Ceramics">Handcrafted Meru Pottery & Ceramics</option>
                       <option value="Arusha Coffee & Organic Spices">Arusha Coffee & Organic Spices</option>
                     </select>
                   </div>

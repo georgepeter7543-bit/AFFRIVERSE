@@ -4,11 +4,12 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Star, Shield, Award, MapPin } from "lucide-react";
+import { useStore } from "@/lib/store";
 import type { Language, Currency } from "@/lib/data";
 
 interface HeroSectionProps {
-  lang: Language;
-  currency: Currency;
+  lang?: Language;
+  currency?: Currency;
 }
 
 const content = {
@@ -19,7 +20,7 @@ const content = {
     headlineAccent: "Global Markets",
     headlineEnd: "& Ethical Luxury",
     subheadline:
-      "Connecting Arusha's finest craftsmen, Maasai shuka weavers, and gemstone artisans directly to world buyers. Discover authentic Arusha artisan-made goods crafted with heritage and precision.",
+      "Connecting Arusha's finest craftsmen, Maasai shuka weavers, and fine artists directly to world buyers. Discover authentic Arusha artisan-made goods crafted with heritage and precision.",
     cta1: "Explore Arusha Collection",
     cta2: "Meet Arusha Artisans",
     stat1: { value: "2,400+", label: "Arusha Artisans" },
@@ -33,7 +34,7 @@ const content = {
     headlineAccent: "Masoko ya Kimataifa",
     headlineEnd: "& Utamaduni",
     subheadline:
-      "Kuunganisha mafundi bora wa Arusha, waunda vitambaa vya Maasai shuka, na vito na wanunuzi wa kimataifa. Gundua bidhaa halisi za mikono za Arusha.",
+      "Kuunganisha mafundi bora wa Arusha, waunda vitambaa vya Maasai shuka, na wachoraji na wanunuzi wa kimataifa. Gundua bidhaa halisi za mikono za Arusha.",
     cta1: "Chunguza Mkusanyiko",
     cta2: "Kutana na Mafundi",
     stat1: { value: "2,400+", label: "Mafundi wa Arusha" },
@@ -42,7 +43,9 @@ const content = {
   },
 };
 
-export default function HeroSection({ lang }: HeroSectionProps) {
+export default function HeroSection({ lang: propsLang }: HeroSectionProps = {}) {
+  const store = useStore();
+  const lang: Language = (propsLang || store.lang) as Language;
   const c = content[lang];
   const heroRef = useRef<HTMLDivElement>(null);
 

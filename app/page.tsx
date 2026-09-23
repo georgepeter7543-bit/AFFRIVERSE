@@ -13,13 +13,12 @@ import Footer from "@/components/Footer";
 import ArtisanCard from "@/components/ArtisanCard";
 import SellerOnboarding from "@/components/SellerOnboarding";
 import { artisans } from "@/lib/data";
-import type { Language, Currency } from "@/lib/data";
+import { useStore } from "@/lib/store";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function HomePage() {
-  const [lang, setLang] = useState<Language>("en");
-  const [currency, setCurrency] = useState<Currency>("USD");
+  const { lang, setLang, currency, setCurrency } = useStore();
   const isEn = lang === "en";
 
   return (
@@ -90,7 +89,7 @@ export default function HomePage() {
           </h2>
           <p className="text-earth-cream/70 font-body text-lg max-w-xl mx-auto mb-12">
             {isEn
-              ? "Join 2,400+ verified Arusha artisans selling Maasai shuka, jewelry, fine art, and wood carvings with direct local Boda Boda dispatch."
+              ? "Join 2,400+ verified Arusha artisans selling Maasai shuka, jewelry, fine art, and handcrafted goods with direct local Boda Boda dispatch."
               : "Jiunge na mafundi 2,400+ wa Arusha wanaouza bidhaa zao duniani kote."}
           </p>
           <SellerOnboarding lang={lang} compact={true} />

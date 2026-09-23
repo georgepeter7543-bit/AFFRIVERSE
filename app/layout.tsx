@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { AuthProvider } from "@/components/AuthProvider";
+import AfriverseAiAssistant from "@/components/AfriverseAiAssistant";
 
 export const metadata: Metadata = {
   title: "AFRIVERSE Arusha — Connecting Arusha Artisans to Global Markets",
   description:
-    "Connecting Arusha artisans to global markets. Authentic Arusha artisan-made goods, tanzanite jewelry, Maasai shuka textiles, and cultural experiences directly from Arusha, Tanzania.",
+    "Connecting Arusha artisans to global markets. Authentic Arusha artisan-made goods, Maasai beadwork, Maasai shuka textiles, and cultural experiences directly from Arusha, Tanzania.",
   keywords: [
     "Arusha",
     "Arusha Artisans",
     "Tanzania",
-    "Tanzanite",
+    "Maasai Beadwork",
     "Maasai Shuka",
     "African art",
     "luxury crafts",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "AFRIVERSE Arusha — Connecting Arusha Artisans to Global Markets",
     description:
-      "Discover authentic Arusha artisan-made goods, tanzanite jewelry, Maasai shuka textiles, and cultural experiences from Arusha, Tanzania.",
+      "Discover authentic Arusha artisan-made goods, Maasai beadwork, Maasai shuka textiles, and cultural experiences from Arusha, Tanzania.",
     type: "website",
   },
 };
@@ -44,13 +44,12 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-obsidian text-earth-cream antialiased overflow-x-hidden flex flex-col min-h-screen">
-        <header className="flex justify-between items-center p-4 bg-gray-900 text-white">
-          <h1 className="text-xl font-bold">AFRIVERSE Arusha</h1>
-          <ThemeToggle />
-        </header>
-        <AuthProvider>
-          <StoreProvider>{children}</StoreProvider>
-        </AuthProvider>
+        <StoreProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+          <AfriverseAiAssistant />
+        </StoreProvider>
       </body>
     </html>
   );

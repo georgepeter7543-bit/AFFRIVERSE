@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { Instagram, Twitter, Facebook, Youtube, MapPin, Phone, Mail, ShieldCheck } from "lucide-react";
 import type { Language } from "@/lib/data";
+import { useStore } from "@/lib/store";
 
 interface FooterProps {
-  lang: Language;
+  lang?: Language;
 }
 
-export default function Footer({ lang }: FooterProps) {
+export default function Footer({ lang: propsLang }: FooterProps = {}) {
+  const store = useStore();
+  const lang = propsLang || store.lang;
   const isEn = lang === "en";
 
   return (
@@ -52,8 +55,22 @@ export default function Footer({ lang }: FooterProps) {
             <h4 className="section-label mb-5">{isEn ? "Arusha Shop" : "Duka la Arusha"}</h4>
             <ul className="space-y-3">
               {(isEn
-                ? ["Maasai Shuka & Textiles", "Maasai Shuka Jewelry", "Tanzanite & Gold Jewelry", "Mount Meru Fine Art", "Tengeru Wood Carvings", "Arusha Coffee & Spices"]
-                : ["Vitambaa vya Maasai Shuka", "Mapambo ya Maasai Shuka", "Tanzanite & Mapambo", "Sanaa ya Mlima Meru", "Uchongaji wa Tengeru", "Kahawa & Viungo"]
+                ? [
+                    "Maasai Shuka & Cultural Textiles",
+                    "Maasai Shuka Beadwork & Regalia",
+                    "Maasai Shuka Jewelry",
+                    "East African Fine Art & Decor",
+                    "Arusha Coffee & Organic Spices",
+                    "Handcrafted Meru Clay & Pottery",
+                  ]
+                : [
+                    "Maasai Shuka & Vitambaa vya Jadi",
+                    "Maasai Shuka & Shanga za Jadi",
+                    "Mapambo ya Maasai Shuka",
+                    "Sanaa ya Afrika Mashariki na Mapambo",
+                    "Kahawa & Viungo vya Arusha",
+                    "Vyombo vya Udongo vya Meru",
+                  ]
               ).map((item) => (
                 <li key={item}>
                   <Link href="/products" className="text-earth-cream/70 hover:text-gold text-sm font-body transition-colors">
