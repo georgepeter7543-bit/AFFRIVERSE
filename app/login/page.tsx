@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Sparkles, CheckCircle2, AlertCircle, Eye, EyeOff, X } from "lucide-react";
+import { CheckCircle2, AlertCircle, Eye, EyeOff, X } from "lucide-react";
 
 type Role = "customer" | "artisan" | "admin";
 type AuthMode = "login" | "register";
@@ -67,34 +67,6 @@ export default function LoginPage() {
     return "/";
   };
 
-  // Quick Demo Access Logins
-  const handleQuickLogin = (role: Role) => {
-    if (role === "admin") {
-      login("admin", "8509Sirat#");
-      router.push("/dashboard/admin");
-    } else if (role === "artisan") {
-      const artisanUser = {
-        id: "a1",
-        name: "Amina Kessy",
-        email: "amina@merucrafts.co.tz",
-        role: "artisan" as const,
-        shopName: "Amina Meru Cultural Crafts Studio",
-        phone: "+255754998882",
-      };
-      setCurrentUser(artisanUser);
-      router.push("/dashboard/artisan");
-    } else {
-      const customerUser = {
-        id: "u-cust",
-        name: "Baraka Edward",
-        email: "baraka@example.com",
-        role: "customer" as const,
-        phone: "+255714223344",
-      };
-      setCurrentUser(customerUser);
-      router.push(redirectPath || "/dashboard/customer");
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -251,35 +223,6 @@ export default function LoginPage() {
       <Navbar lang={lang} currency={currency} onLangChange={setLang} onCurrencyChange={setCurrency} />
 
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-lg mx-auto">
-        {/* Demo Fast-Login Pill Bar */}
-        <div className="glass-card rounded-2xl p-4 border border-[#D4AF37]/30 mb-8 bg-[#D4AF37]/5 shadow-luxury">
-          <div className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider mb-2 text-center flex items-center justify-center gap-1.5">
-            <Sparkles size={14} /> Quick Demo Access (Instant RBAC Switch)
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => handleQuickLogin("admin")}
-              className="px-2 py-2 rounded-xl bg-obsidian-surface border border-[#D4AF37]/40 text-[#D4AF37] text-xs font-bold hover:bg-[#D4AF37] hover:text-black transition-all text-center"
-            >
-              👑 Admin
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickLogin("artisan")}
-              className="px-2 py-2 rounded-xl bg-obsidian-surface border border-amber-500/40 text-amber-300 text-xs font-bold hover:bg-amber-400 hover:text-black transition-all text-center"
-            >
-              🎨 Artisan
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickLogin("customer")}
-              className="px-2 py-2 rounded-xl bg-obsidian-surface border border-sky-500/40 text-sky-300 text-xs font-bold hover:bg-sky-400 hover:text-black transition-all text-center"
-            >
-              🛍️ Customer
-            </button>
-          </div>
-        </div>
 
         {/* Main Form Card */}
         <div className="glass-card rounded-3xl p-8 border-2 border-[#D4AF37]/30 shadow-luxury space-y-6 bg-[#141418] relative">
