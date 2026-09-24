@@ -15,12 +15,12 @@ export default function PaymentPage() {
   const isEn = lang === "en";
 
   const [selectedMethod, setSelectedMethod] = useState<string>("mpesa");
-  const [phoneNumber, setPhoneNumber] = useState("+255714223344");
-  const [cardNumber, setCardNumber] = useState("4532 8890 1234 5678");
-  const [cardExpiry, setCardExpiry] = useState("12/28");
-  const [cardCvc, setCardCvc] = useState("882");
-  const [deliveryLocation, setDeliveryLocation] = useState("Njiro Complex, Arusha");
-  const [customerName, setCustomerName] = useState("Baraka Edward");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvc, setCardCvc] = useState("");
+  const [deliveryLocation, setDeliveryLocation] = useState("");
+  const [customerName, setCustomerName] = useState("");
 
   const [processing, setProcessing] = useState(false);
   const [ussdPrompt, setUssdPrompt] = useState(false);
@@ -236,6 +236,7 @@ export default function PaymentPage() {
                       required
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="e.g. Peter George"
                       className="w-full bg-obsidian-surface border border-gold/30 rounded-xl px-4 py-3 text-sm text-earth-cream font-body"
                     />
                   </div>
@@ -249,7 +250,7 @@ export default function PaymentPage() {
                       required
                       value={deliveryLocation}
                       onChange={(e) => setDeliveryLocation(e.target.value)}
-                      placeholder="e.g. Njiro Complex, Sakina, Clock Tower CBD"
+                      placeholder="e.g. Njiro, Sakina, or Clocktower"
                       className="w-full bg-obsidian-surface border border-gold/30 rounded-xl px-4 py-3 text-sm text-earth-cream font-body"
                     />
                   </div>
@@ -265,6 +266,7 @@ export default function PaymentPage() {
                           required
                           value={phoneNumber}
                           onChange={(e) => setPhoneNumber(e.target.value)}
+                          placeholder="e.g. +255 7XX XXX XXX"
                           className="w-full bg-obsidian-surface border border-gold/30 rounded-xl px-4 py-3 text-sm text-earth-cream font-mono"
                         />
                         <Phone size={16} className="absolute right-4 top-3.5 text-gold/60" />
